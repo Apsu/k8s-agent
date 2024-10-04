@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4.2.0
 
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5.0.2
         with:
           go-version: '1.23'
 
@@ -30,7 +30,7 @@ jobs:
           tar -czvf package.tgz -C release .
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2.0.8
         with:
           files: package.tgz
         env:
