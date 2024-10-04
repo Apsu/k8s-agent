@@ -1,0 +1,4 @@
+
+[Route]
+Destination=$VIRTUAL_IP/$VIRTUAL_CIDR
+Gateway=0.0.0.0

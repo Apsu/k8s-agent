@@ -20,13 +20,13 @@ jobs:
 
       - name: Build Go binary
         run: |
-          go build -o k8s-agent main.go
+          go build -o k8s-agent cmd/agent/main.go
 
       - name: Package manifests and binary
         run: |
           mkdir release
-          cp k8s-agent k8s-agent.service release/
-          cp -r manifests release/
+          cp k8s-agent install.sh release/
+          cp -r configs manifests scripts release/
           tar -czvf package.tgz -C release .
 
       - name: Create GitHub Release
