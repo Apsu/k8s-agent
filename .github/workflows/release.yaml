@@ -25,13 +25,13 @@ jobs:
       - name: Package manifests and binary
         run: |
           mkdir release
-          cp k8s-agent install.sh release/
+          cp k8s-agent release/
           cp -r configs manifests scripts release/
           tar -czvf package.tgz -C release .
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2.0.8
         with:
-          files: package.tgz
+          files: install.sh package.tgz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
