@@ -20,14 +20,23 @@ set -a
 . $AGENT_CONF
 set +a
 
+# Handle bootstrap case
+if [[ $NODE_ROLE == "bootstrap" ]]; then
+  RKE2_TYPE="server"
+elif [[ $NODE_ROLE == "controller" ]]; then
+  RKE2_TYPE="server"
+else
+  RKE2_TYPE="agent"
+fi
+
 ### Summary ###
 echo "Deploying $NODE_NAME:"
 echo "- Public IP: $PUBLIC_IP"
 echo "- API IP: $VIRTUAL_IP/$VIRTUAL_CIDR"
 echo "- Interface: $INTERFACE"
-echo "- First node: $FIRST_NODE"
-echo "- Node type: $NODE_TYPE"
-echo "- RKE2 version: $RKE2_VERSION"
+echo "- Node role: $NODE_ROLE"
+echo "- RKE2 type: $RKE2_TYPE"
+echo "- RKE2 release: $RKE2_RELEASE"
 echo "- RKE2 token: $RKE2_TOKEN"
 
 ### Fixup networking ###
@@ -48,7 +57,7 @@ networkctl reload
 mkdir -m755 -p $RKE2_CONF_DIR $RKE_MANIFEST_DIR
 
 # Install RKE2
-curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=$NODE_TYPE INSTALL_RKE2_VERSION=$RKE2_VERSION sh -
+curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=$RKE2_TYPE INSTALL_RKE2_VERSION=$RKE2_RELEASE sh -
 
 # Copy custom registry
 # cp configs/registries.yaml $RKE2_CONF_DIR/registries.yaml
@@ -56,8 +65,8 @@ curl -sfL https://get.rke2.io | INSTALL_RKE2_TYPE=$NODE_TYPE INSTALL_RKE2_VERSIO
 # Reload network config
 networkctl reload
 
-if [[ $NODE_TYPE == "server" ]]; then
-  if [[ $FIRST_NODE == "true" ]]; then
+if [[ $RKE2_TYPE == "server" ]]; then
+  if [[ $NODE_ROLE == "bootstrap" ]]; then
     # # Generate self-signed cert
     # openssl genrsa -out tls.key 2048
     # openssl req -new -key tls.key -out tls.csr -subj "/CN=$PUBLIC_IP"
@@ -93,15 +102,12 @@ if [[ $NODE_TYPE == "server" ]]; then
   # Run it
   systemctl enable --now --no-block rke2-server.service
   systemctl mask rke2-agent.service
-elif [[ $NODE_TYPE == "agent" ]]; then
+elif [[ $RKE2_TYPE == "agent" ]]; then
   # Render agent config
   envsubst < $AGENT_DIR/configs/agent-config.yaml > $RKE2_CONF_DIR/config.yaml
 
-  # Secure config
-  chown 0600 $RKE2_CONF_DIR/config.yaml
-
-  # Run it
-  systemctl enable --now --no-block rke2-agent.service
+  # SecurRKE2_TYPE  chown 0600 $RKE2_CONF_DIR/config.yaNODE_ROLE it
+bootstraptemctl enable --now --no-block rke2-agent.service
   systemctl mask rke2-server.service
 fi
 

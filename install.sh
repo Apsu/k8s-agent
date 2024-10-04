@@ -2,6 +2,14 @@
 
 set -euo pipefail
 
+### Overridable defaults ###
+VIRTUAL_IP=${VIRTUAL_IP:-192.168.1.1}
+VIRTUAL_CIDR=${VIRTUAL_CIDR:-32}
+INTERFACE=${INTERFACE:-eno1}
+NODE_ROLE=${NODE_ROLE:-worker}
+RKE2_RELEASE=${RKE2_RELEASE:-v1.30.5+rke2r1}
+AGENT_VERSION=${AGENT_VERSION:-v0.0.6}
+
 ### Init ###
 # Check if required data is provided
 if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" ]]; then
@@ -11,26 +19,18 @@ if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" ]]; then
     Environment variables:
     TOKEN           Secure token for cluster joining (required)
     PUBLIC_IP       Public IP this node is reachable at (required)
-    VIRTUAL_IP      VIP used for API endpoint (default: 192.168.1.1)
-    VIRTUAL_CIDR    VIP CIDR mask (default: 32)
-    INTERFACE       Interface to use for K8s networking (default: eno1)
-    NODE_TYPE       RKE2 node type; [server | agent] (default: agent)
-    FIRST_NODE      First controller in the cluster; [true | false] (default: false)
-    RKE2_VERSION    RKE2 version to deploy (default: v1.30.5+rke2r1)
+    VIRTUAL_IP      VIP used for API endpoint (default: $VIRTUAL_IP)
+    VIRTUAL_CIDR    VIP CIDR mask (default: $VIRTUAL_CIDR)
+    INTERFACE       Interface to use for K8s networking (default: $INTERFACE)
+    NODE_ROLE       Node role; [bootstrap | controller | worker] (default: $NODE_ROLE)
+    RKE2_RELEASE    RKE2 release to deploy (default: $RKE2_RELEASE)
+    AGENT_VERSION   Version of this agent to deploy (default: $AGENT_VERSION)
 EOF
     exit 1
 fi
 
-### Overridable defaults ###
-VIRTUAL_IP=${VIRTUAL_IP:-192.168.1.1}
-VIRTUAL_CIDR=${VIRTUAL_CIDR:-32}
-INTERFACE=${INTERFACE:-eno1}
-NODE_TYPE=${NODE_TYPE:-agent}                  # Default to worker node
-FIRST_NODE=${FIRST_NODE:-false}                # Default to secondary controller when type is 'server'
-RKE2_VERSION=${RKE2_VERSION:-v1.30.5+rke2r1}
-
 ### Paths ###
-TGZ_URL="https://github.com/Apsu/k8s-agent/releases/download/v0.0.3/package.tgz"
+TGZ_URL="https://github.com/Apsu/k8s-agent/releases/download/$AGENT_VERSION/package.tgz"
 INSTALL_PATH="/opt/k8s-agent"
 CONFIG_PATH="/etc/default/k8s-agent"
 SERVICE_PATH="/etc/systemd/system/k8s-agent.service"
@@ -42,9 +42,9 @@ PUBLIC_IP=$PUBLIC_IP
 VIRTUAL_IP=$VIRTUAL_IP
 VIRTUAL_CIDR=$VIRTUAL_CIDR
 INTERFACE=$INTERFACE
-NODE_TYPE=$NODE_TYPE
-FIRST_NODE=$FIRST_NODE
-RKE2_VERSION=$RKE2_VERSION
+NODE_ROLE=$NODE_ROLE
+RKE2_RELEASE=$RKE2_RELEASE
+AGENT_VERSION=$AGENT_VERSION
 EOF
 
 # Download and extract the release
