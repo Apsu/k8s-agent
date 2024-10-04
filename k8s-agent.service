@@ -1,0 +1,11 @@
+[Unit]
+Description=Kubernetes Agent
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/default/k8s-agent
+ExecStart=/opt/k8s-agent/k8s-agent
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
