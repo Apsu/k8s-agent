@@ -4,7 +4,7 @@ set -euo pipefail
 
 ### Init ###
 # Check if required data is provided
-if [[ -z "$TOKEN" || -z "$PUBLIC_IP" ]]; then
+if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" ]]; then
     echo <<- EOF
     Usage: TOKEN=... PUBLIC_IP=... $0
 
