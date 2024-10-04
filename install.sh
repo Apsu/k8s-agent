@@ -2,9 +2,24 @@
 
 set -euo pipefail
 
-### Required as env or args ###
-TOKEN=${TOKEN:-$1}
-PUBLIC_IP=${PUBLIC_IP:-$2}
+### Init ###
+# Check if required data is provided
+if [[ -z "$TOKEN" || -z "$PUBLIC_IP" ]]; then
+    echo <<- EOF
+    Usage: TOKEN=... PUBLIC_IP=... $0
+
+    Environment variables:
+    TOKEN           Secure token for cluster joining (required)
+    PUBLIC_IP       Public IP this node is reachable at (required)
+    VIRTUAL_IP      VIP used for API endpoint (default: 192.168.1.1)
+    VIRTUAL_CIDR    VIP CIDR mask (default: 32)
+    INTERFACE       Interface to use for K8s networking (default: eno1)
+    NODE_TYPE       RKE2 node type; [server | agent] (default: agent)
+    FIRST_NODE      First controller in the cluster; [true | false] (default: false)
+    RKE2_VERSION    RKE2 version to deploy (default: v1.30.5+rke2r1)
+EOF
+    exit 1
+fi
 
 ### Overridable defaults ###
 VIRTUAL_IP=${VIRTUAL_IP:-192.168.1.1}
@@ -31,15 +46,6 @@ NODE_TYPE=$NODE_TYPE
 FIRST_NODE=$FIRST_NODE
 RKE2_VERSION=$RKE2_VERSION
 EOF
-
-# Check if required data is provided
-if [[ -z "$TOKEN" || -z "$PUBLIC_IP" ]]; then
-    echo "Usage: $0 <TOKEN> <PUBLIC_IP>"
-    echo "- or set TOKEN and PUBLIC_IP in environment"
-    echo
-    echo "TOKEN and PUBLIC_IP are required."
-    exit 1
-fi
 
 # Download and extract the release
 mkdir -p $INSTALL_PATH

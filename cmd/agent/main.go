@@ -28,7 +28,8 @@ func main() {
 	g.Use(middleware.KeyAuth(auth.TokenValidator))
 
 	// Admin routes
-	g.POST("/api/deploy", handler.Deploy)
+	g.POST("/deploy", handler.Deploy)
+	g.POST("/prepare", handler.Prepare)
 	g.POST("/teardown", handler.Teardown)
 	g.POST("/restart", handler.Restart)
 	g.POST("/upgrade", handler.Upgrade)
