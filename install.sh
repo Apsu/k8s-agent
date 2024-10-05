@@ -59,7 +59,7 @@ EOF
 # Download and extract the release
 mkdir -p $INSTALL_PATH
 curl -sfL $TGZ_URL -o /tmp/package.tgz
-tar -xzf /tmp/package.tgz -C $INSTALL_PATH
+tar -xzf --no-same-owner /tmp/package.tgz -C $INSTALL_PATH
 
 # Create systemd service
 cp $INSTALL_PATH/configs/k8s-agent.service $SERVICE_PATH
