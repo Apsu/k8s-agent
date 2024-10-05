@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+env | sort
+
+# Auto-export vars
+set -a
+
 ### Paths ###
 AGENT_CONF=/etc/default/k8s-agent
 AGENT_DIR=/opt/k8s-agent
@@ -12,13 +17,14 @@ KUBECONFIG=$RKE2_CONF_DIR/rke2.yaml
 KUBECTL=$RKE2_DATA_DIR/bin/kubectl
 NETWORKD_DIR=/etc/systemd/network
 
+### Load agent vars ###
+. $AGENT_CONF
+
+# Disable auto-export
+set +a
+
 ### Logging ###
 exec >> $AGENT_DIR/deploy.log 2>&1
-
-### Load agent vars ###
-set -a
-. $AGENT_CONF
-set +a
 
 # Handle bootstrap case
 if [[ $NODE_ROLE == "bootstrap" ]]; then

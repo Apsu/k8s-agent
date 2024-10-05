@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+env | sort
+
 ### Paths ###
 AGENT_CONF=/etc/default/k8s-agent
 AGENT_DIR=/opt/k8s-agent
@@ -34,6 +36,9 @@ apt autoremove --purge -y '~i !~OUbuntu'
 
 # Purge unneeded packages and deps
 apt autoremove --purge -y apparmor snapd nvidia* mesa* ruby* golang* javascript* docker* containerd* ffmpeg* emacs* font* gfortran* packagekit* polkit* thermald* power* multipath* irqbalance*
+
+# Purge old kernels if present
+apt autoremove --purge -y linux-{image,headers,modules,virtual,generic}-*
 
 # Remove 3rd party repos
 rm -f /etc/apt/sources.list.d/* /etc/apt/cloud-init.gpg.d/*
