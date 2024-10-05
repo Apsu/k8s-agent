@@ -38,16 +38,17 @@ const (
 // Status struct holds the state of the agent and related information
 // mu sync.RWMutex `json:"-"` // Mutex is ignored during JSON marshalling
 type Status struct {
-	State     string `env:"STATE" envdefault:"Initialized"` // Current agent state
-	PublicIP  string `env:"PUBLIC_IP"`                      // Node public IP
-	ApiIP     string `env:"API_IP"`                         // Control plane IP/VIP
-	ApiCIDR   string `env:"API_CIDR"`                       // Control plane CIDR
-	Interface string `env:"INTERFACE"`                      // Node interface
-	Release   string `env:"RKE2_RELEASE"`                   // K8s release
-	Region    string `env:"NODE_REGION"`                    // Node region
-	Role      string `env:"NODE_ROLE"`                      // Node role (bootstrap/server/agent)
-	GpuCount  int    `env:"GPU_COUNT"`                      // Node GPU count
-	Version   string `env:"AGENT_VERSION"`                  // Agent version
+	State      string `env:"STATE" envdefault:"Running"` // Current agent state
+	Name       string `env:"NODE_NAME"`                  // Node name
+	PublicIP   string `env:"PUBLIC_IP"`                  // Node public IP
+	ApiIP      string `env:"API_IP"`                     // Control plane IP/VIP
+	ApiCIDR    string `env:"API_CIDR"`                   // Control plane CIDR
+	Interface  string `env:"INTERFACE"`                  // Node interface
+	Region     string `env:"NODE_REGION"`                // Node region
+	Role       string `env:"NODE_ROLE"`                  // Node role (bootstrap/server/agent)
+	GpuCount   int    `env:"GPU_COUNT"`                  // Node GPU count
+	K8sRelease string `env:"RKE2_RELEASE"`               // K8s release
+	Version    string `env:"AGENT_VERSION"`              // Agent version
 }
 
 var agentStatus = Status{}
