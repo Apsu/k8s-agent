@@ -66,6 +66,7 @@ cp $INSTALL_PATH/configs/k8s-agent.service $SERVICE_PATH
 
 # Start the agent service
 systemctl daemon-reload
-systemctl enable --now k8s-agent
+systemctl enable k8s-agent
+systemctl restart k8s-agent
 
 echo "Agent installed and started."
