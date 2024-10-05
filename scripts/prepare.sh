@@ -3,16 +3,25 @@
 set -euo pipefail
 
 ### Paths ###
+AGENT_CONF=/etc/default/k8s-agent
 AGENT_DIR=/opt/k8s-agent
 
 ### Logging ###
 exec >> $AGENT_DIR/prepare.log 2>&1
 
+### Load agent vars ###
+set -a
+. $AGENT_CONF
+set +a
+
 ### Env flags ###
 export DEBIAN_FRONTEND=noninteractive
 
 ### Packages, kernel, systemd ###
-echo "Preparing node on first boot..."
+echo "Preparing node..."
+
+# Set hostname
+hostnamectl set-hostname $NODE_NAME
 
 # Stop lambda units
 systemctl disable --now cloudflared.service cloudflared-update.{service,timer} lambda-jupyter.service lambda-first-boot.service || true
@@ -30,9 +39,9 @@ apt autoremove --purge -y apparmor snapd nvidia* mesa* ruby* golang* javascript*
 rm -f /etc/apt/sources.list.d/* /etc/apt/cloud-init.gpg.d/*
 
 # Remove custom pieces
-rm -f /etc/systemd/system/cloudflared*
-rm -f /etc/systemd/system/lambda-jupyter*
-rm -f /lib/systemd/system/lambda-first-boot*
+rm -rf /etc/systemd/system/cloudflared*
+rm -rf /etc/systemd/system/lambda-jupyter*
+rm -rf /lib/systemd/system/lambda-first-boot*
 rm -f /usr/bin/disable-mig.sh
 
 # Update repos
@@ -54,7 +63,7 @@ systemctl daemon-reload
 rm -rf /home/ubuntu/.{cache,config,ipython,jupyter,lambda,local}
 
 # Mark completion
-touch $AGENT_CONF/.prepared
+touch $AGENT_DIR/.prepared
 echo "Preparation time: $SECONDS seconds"
 
 # Apparmor/driver unload/etc
