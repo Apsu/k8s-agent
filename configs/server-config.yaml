@@ -1,7 +1,7 @@
 node-name: $NODE_NAME
 server: https://$API_IP:9345
 token: $TOKEN
-data-dir: /var/lib/rancher/rke2
+data-dir: $RKE_DATA_DIR
 disable: ['rke2-canal', 'rke2-ingress-nginx']
 disable-cloud-controller: true
 disable-kube-proxy: true
