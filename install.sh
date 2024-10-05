@@ -14,13 +14,14 @@ AGENT_VERSION=${AGENT_VERSION:-"v0.0.6"}
 
 ### Init ###
 # Check if required data is provided
-if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" ]]; then
+if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" || -z "${NODE_NAME:-}" ]]; then
     echo <<- EOF
-    Usage: TOKEN=... PUBLIC_IP=... $0
+    Usage: TOKEN=... PUBLIC_IP=... NODE_NAME=... $0
 
     Environment variables:
     TOKEN           Secure token for cluster joining (required)
     PUBLIC_IP       Public IP this node is reachable at (required)
+    NODE_NAME       Hostname to use for this node (required)
     API_IP          IP used for API endpoint (default: $API_IP)
     API_CIDR        IP CIDR mask (default: $API_CIDR)
     INTERFACE       Interface to use for K8s networking (default: $INTERFACE)
@@ -48,6 +49,7 @@ API_IP=$API_IP
 API_CIDR=$API_CIDR
 INTERFACE=$INTERFACE
 RKE2_RELEASE=$RKE2_RELEASE
+NODE_NAME=$NODE_NAME
 NODE_ROLE=$NODE_ROLE
 NODE_REGION=$NODE_REGION
 GPU_COUNT=$GPU_COUNT
