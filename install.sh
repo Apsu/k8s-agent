@@ -15,7 +15,7 @@ AGENT_VERSION=${AGENT_VERSION:-"v0.0.6"}
 ### Init ###
 # Check if required data is provided
 if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" || -z "${NODE_NAME:-}" ]]; then
-    echo <<- EOF
+    cat <<- EOF
     Usage: TOKEN=... PUBLIC_IP=... NODE_NAME=... $0
 
     Environment variables:

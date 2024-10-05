@@ -30,7 +30,7 @@ else
 fi
 
 ### Summary ###
-echo <<EOF
+cat <<EOF
 Deploying $NODE_NAME:
 - Token: $TOKEN
 - Public IP: $PUBLIC_IP
