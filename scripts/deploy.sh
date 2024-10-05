@@ -82,10 +82,10 @@ if [[ $RKE2_TYPE == "server" ]]; then
     if ! grep -q $API_IP/$API_CIDR -o address show dev $INTERFACE; then
       ip address add $API_IP/$API_CIDR dev $INTERFACE
     fi
-  fi
 
-  # Render server config
-  envsubst < $AGENT_DIR/configs/server-config.yaml > $RKE2_CONF_DIR/config.yaml
+    # Render bootstrap config
+    envsubst < $AGENT_DIR/configs/bootstrap-config.yaml > $RKE2_CONF_DIR/config.yaml
+  fi
 
   # Render manifests
   envsubst < $AGENT_DIR/manifests/kube-vip.yaml > $RKE_MANIFEST_DIR/kube-vip.yaml
@@ -100,8 +100,22 @@ if [[ $RKE2_TYPE == "server" ]]; then
   # Copy CRDs
   cp $AGENT_DIR/manifests/rke2-cilium-crds.yaml $RKE_MANIFEST_DIR/rke2-cilium-crds.yaml
 
+  if [[ $NODE_ROLE == "bootstrap" ]]; then
+    # Start and wait
+    systemctl start rke2-server.service
+
+    # Wait for node to become active
+    while ! $KUBECTL --kubeconfig $KUBECONFIG get node $NODE_NAME | grep -q "Ready"; do
+      sleep 5
+    done
+  fi
+
+  # Render server config
+  envsubst < $AGENT_DIR/configs/server-config.yaml > $RKE2_CONF_DIR/config.yaml
+
   # Run it
-  systemctl enable --now --no-block rke2-server.service
+  systemctl enable rke2-server.service
+  systemctl restart --no-block rke2-server.service
   systemctl mask rke2-agent.service
 elif [[ $RKE2_TYPE == "agent" ]]; then
   # Render agent config

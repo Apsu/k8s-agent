@@ -1,0 +1,11 @@
+node-name: $NODE_NAME
+token: $TOKEN
+data-dir: $RKE2_DATA_DIR
+disable: ['rke2-canal', 'rke2-ingress-nginx']
+disable-cloud-controller: true
+disable-kube-proxy: true
+cni: cilium
+tls-san:
+- cluster.local
+- $API_IP
+- $PUBLIC_IP
