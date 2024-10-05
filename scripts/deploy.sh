@@ -30,14 +30,18 @@ else
 fi
 
 ### Summary ###
-echo "Deploying $NODE_NAME:"
-echo "- Public IP: $PUBLIC_IP"
-echo "- API IP: $VIRTUAL_IP/$VIRTUAL_CIDR"
-echo "- Interface: $INTERFACE"
-echo "- Node role: $NODE_ROLE"
-echo "- RKE2 type: $RKE2_TYPE"
-echo "- RKE2 release: $RKE2_RELEASE"
-echo "- RKE2 token: $RKE2_TOKEN"
+echo <<EOF
+Deploying $NODE_NAME:
+- Token: $TOKEN
+- Public IP: $PUBLIC_IP
+- API IP: $API_IP/$API_CIDR
+- Interface: $INTERFACE
+- Node role: $NODE_ROLE
+- Node region: $NODE_REGION
+- GPU count: $GPU_COUNT
+- RKE2 type: $RKE2_TYPE
+- RKE2 release: $RKE2_RELEASE
+EOF
 
 ### Fixup networking ###
 
@@ -45,7 +49,7 @@ echo "- RKE2 token: $RKE2_TOKEN"
 sed -i "/^Address=$PUBLIC_IP.*/d" $NETWORKD_DIR/20-wired.network
 
 # Insert private VIP route as on-link
-if ! grep -q $VIRTUAL_IP $NETWORKD_DIR/20-wired.network; then
+if ! grep -q $API_IP $NETWORKD_DIR/20-wired.network; then
   envsubst < $AGENT_DIR/configs/vip-route.network >> $NETWORKD_DIR/20-wired.network
 fi
 
@@ -75,16 +79,13 @@ if [[ $RKE2_TYPE == "server" ]]; then
     # export TLS_KEY=$(base64 -w0 tls.key)
     # export TLS_CERT=$(base64 -w0 tls.crt)
 
-    if ! grep -q $VIRTUAL_IP/$VIRTUAL_CIDR -o address show dev $INTERFACE; then
-      ip address add $VIRTUAL_IP/$VIRTUAL_CIDR dev $INTERFACE
+    if ! grep -q $API_IP/$API_CIDR -o address show dev $INTERFACE; then
+      ip address add $API_IP/$API_CIDR dev $INTERFACE
     fi
   fi
 
   # Render server config
   envsubst < configs/server-config.yaml > $RKE2_CONF_DIR/config.yaml
-
-  # Secure config
-  chown 0600 $RKE2_CONF_DIR/config.yaml
 
   # Render manifests
   envsubst < $AGENT_DIR/manifests/kube-vip.yaml > $RKE_MANIFEST_DIR/kube-vip.yaml
@@ -106,10 +107,13 @@ elif [[ $RKE2_TYPE == "agent" ]]; then
   # Render agent config
   envsubst < $AGENT_DIR/configs/agent-config.yaml > $RKE2_CONF_DIR/config.yaml
 
-  # SecurRKE2_TYPE  chown 0600 $RKE2_CONF_DIR/config.yaNODE_ROLE it
-bootstraptemctl enable --now --no-block rke2-agent.service
+  # Run it
+  systemctl enable --now --no-block rke2-agent.service
   systemctl mask rke2-server.service
 fi
+
+# Secure config
+chown 0600 $RKE2_CONF_DIR/config.yaml
 
 ### Finish ###
 touch $AGENT_DIR/.deployed

@@ -3,11 +3,12 @@ package status
 import (
 	// "encoding/json"
 	// "log"
+	"fmt"
 	// "os"
-	"os"
 	"sync"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
+	"github.com/caarlos0/env/v11"
 )
 
 // const statusFilePath = "/opt/k8s-agent/status.json"
@@ -17,12 +18,12 @@ var mu sync.RWMutex
 
 // List of states
 const (
-	Ready      = "Ready"
-	Preparing  = "Preparing"
-	Deploying  = "Deploying"
-	Running    = "Running"
-	Restarting = "Restarting"
-	Error      = "Error"
+	Initialized = "Initialized"
+	Preparing   = "Preparing"
+	Deploying   = "Deploying"
+	Restarting  = "Restarting"
+	Ready       = "Ready"
+	Error       = "Error"
 )
 
 // List of node types
@@ -33,17 +34,18 @@ const (
 )
 
 // Status struct holds the state of the agent and related information
+// mu sync.RWMutex `json:"-"` // Mutex is ignored during JSON marshalling
 type Status struct {
-	// mu sync.RWMutex `json:"-"` // Mutex is ignored during JSON marshalling
-
-	State    string `json:"state"`       // Current agent state
-	Role     string `json:"node_role"`   // Node role (bootstrap/server/agent)
-	Version  string `json:"version"`     // Agent version
-	Release  string `json:"k8s_release"` // K8s release
-	PublicIP string `json:"public_ip"`   // Node public IP
-	ApiIP    string `json:"api_ip"`      // Control plane IP/VIP
-	Region   string `json:"region"`      // Node region
-	GpuCount int    `json:"gpu_count"`   // Node GPU count
+	State     string `env:"STATE" envdefault:"Initialized"` // Current agent state
+	PublicIP  string `env:"PUBLIC_IP"`                      // Node public IP
+	ApiIP     string `env:"API_IP"`                         // Control plane IP/VIP
+	ApiCIDR   string `env:"API_CIDR"`                       // Control plane CIDR
+	Interface string `env:"INTERFACE"`                      // Node interface
+	Release   string `env:"RKE2_RELEASE"`                   // K8s release
+	Region    string `env:"NODE_REGION"`                    // Node region
+	Role      string `env:"NODE_ROLE"`                      // Node role (bootstrap/server/agent)
+	GpuCount  int    `env:"GPU_COUNT"`                      // Node GPU count
+	Version   string `env:"AGENT_VERSION"`                  // Agent version
 }
 
 var agentStatus = Status{}
@@ -61,12 +63,24 @@ func UpdateStatus(newStatus Status) error {
 	defer mu.Unlock()
 	agentStatus = newStatus
 
-	// data, err := json.Marshal(newStatus)
+	// file, err := os.Create(agentEnvPath)
 	// if err != nil {
 	// 	return err
 	// }
+	// defer file.Close()
 
-	// return os.WriteFile(statusFilePath, data, 0600)
+	// // Write each field as "KEY=value"
+	// fmt.Fprintf(file, "STATE=%s\n", agentStatus.State)
+	// fmt.Fprintf(file, "PUBLIC_IP=%s\n", agentStatus.PublicIP)
+	// fmt.Fprintf(file, "API_IP=%s\n", agentStatus.ApiIP)
+	// fmt.Fprintf(file, "API_CIDR=%s\n", agentStatus.ApiCIDR)
+	// fmt.Fprintf(file, "INTERFACE=%s\n", agentStatus.Interface)
+	// fmt.Fprintf(file, "RKE2_RELEASE=%s\n", agentStatus.Release)
+	// fmt.Fprintf(file, "NODE_REGION=%s\n", agentStatus.Region)
+	// fmt.Fprintf(file, "NODE_ROLE=%s\n", agentStatus.Role)
+	// fmt.Fprintf(file, "GPU_COUNT=%d\n", agentStatus.GpuCount)
+	// fmt.Fprintf(file, "AGENT_VERSION=%s\n", agentStatus.Version)
+
 	return nil
 }
 
@@ -75,34 +89,7 @@ func init() {
 	mu.Lock()
 	defer mu.Unlock()
 
-	// Load env file
-	godotenv.Load(agentEnvPath)
-
-	// Set from env
-	agentStatus = Status{
-		State:    Ready,
-		Role:     os.Getenv("NODE_ROLE"),
-		Version:  os.Getenv("AGENT_VERSION"),
-		Release:  os.Getenv("RKE2_RELEASE"),
-		PublicIP: os.Getenv("PUBLIC_IP"),
-		ApiIP:    os.Getenv("VIRTUAL_IP") + "/" + os.Getenv("VIRTUAL_CIDR"),
-		Region:   "",
-		GpuCount: 0,
-	}
-
-	// 	// Try to load from file, ignoring errors
-	// 	data, _ := os.ReadFile(statusFilePath)
-	// 	json.Unmarshal(data, &agentStatus)
-
-	// 	// Write status to file in case it's missing/corrupted
-	// 	data, err := json.Marshal(agentStatus)
-	// 	if err != nil {
-	// 		log.Fatal("Internal error marshaling status")
-	// 	}
-
-	// err = os.WriteFile(statusFilePath, data, 0600)
-	//
-	//	if err != nil {
-	//		log.Fatal("Fatal error saving status file")
-	//	}
+	// Load env
+	env.Parse(agentStatus)
+	fmt.Print(agentStatus)
 }

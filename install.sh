@@ -3,12 +3,14 @@
 set -euo pipefail
 
 ### Overridable defaults ###
-VIRTUAL_IP=${VIRTUAL_IP:-192.168.1.1}
-VIRTUAL_CIDR=${VIRTUAL_CIDR:-32}
-INTERFACE=${INTERFACE:-eno1}
-NODE_ROLE=${NODE_ROLE:-worker}
-RKE2_RELEASE=${RKE2_RELEASE:-v1.30.5+rke2r1}
-AGENT_VERSION=${AGENT_VERSION:-v0.0.6}
+API_IP=${API_IP:-"192.168.1.1"}
+API_CIDR=${API_CIDR:-"32"}
+INTERFACE=${INTERFACE:-"eno1"}
+RKE2_RELEASE=${RKE2_RELEASE:-"v1.30.5+rke2r1"}
+NODE_ROLE=${NODE_ROLE:-"worker"}
+NODE_REGION=${NODE_REGION:-"us-south-2"}
+GPU_COUNT=${GPU_COUNT:-"0"}
+AGENT_VERSION=${AGENT_VERSION:-"v0.0.6"}
 
 ### Init ###
 # Check if required data is provided
@@ -19,11 +21,13 @@ if [[ -z "${TOKEN:-}" || -z "${PUBLIC_IP:-}" ]]; then
     Environment variables:
     TOKEN           Secure token for cluster joining (required)
     PUBLIC_IP       Public IP this node is reachable at (required)
-    VIRTUAL_IP      VIP used for API endpoint (default: $VIRTUAL_IP)
-    VIRTUAL_CIDR    VIP CIDR mask (default: $VIRTUAL_CIDR)
+    API_IP          IP used for API endpoint (default: $API_IP)
+    API_CIDR        IP CIDR mask (default: $API_CIDR)
     INTERFACE       Interface to use for K8s networking (default: $INTERFACE)
-    NODE_ROLE       Node role; [bootstrap | controller | worker] (default: $NODE_ROLE)
     RKE2_RELEASE    RKE2 release to deploy (default: $RKE2_RELEASE)
+    NODE_ROLE       Node role; [bootstrap | controller | worker] (default: $NODE_ROLE)
+    NODE_REGION     Node region (default: $NODE_REGION)
+    GPU_COUNT       Node GPU count (default: $GPU_COUNT)
     AGENT_VERSION   Version of this agent to deploy (default: $AGENT_VERSION)
 EOF
     exit 1
@@ -37,13 +41,16 @@ SERVICE_PATH="/etc/systemd/system/k8s-agent.service"
 
 # Store config
 cat <<EOF > $CONFIG_PATH
+STATE=Initialized
 TOKEN=$TOKEN
 PUBLIC_IP=$PUBLIC_IP
-VIRTUAL_IP=$VIRTUAL_IP
-VIRTUAL_CIDR=$VIRTUAL_CIDR
+API_IP=$API_IP
+API_CIDR=$API_CIDR
 INTERFACE=$INTERFACE
-NODE_ROLE=$NODE_ROLE
 RKE2_RELEASE=$RKE2_RELEASE
+NODE_ROLE=$NODE_ROLE
+NODE_REGION=$NODE_REGION
+GPU_COUNT=$GPU_COUNT
 AGENT_VERSION=$AGENT_VERSION
 EOF
 

@@ -30,14 +30,16 @@ spec:
       - args:
         - manager
         env:
+        - name: address
+          value: "$API_IP"
         - name: vip_arp
           value: "true"
         - name: vip_interface
-          value: $INTERFACE
+          value: "$INTERFACE"
         - name: port
           value: "6443"
         - name: vip_cidr
-          value: "32"
+          value: "$API_CIDR"
         - name: cp_enable
           value: "true"
         - name: cp_namespace
@@ -56,8 +58,6 @@ spec:
           value: "3"
         - name: vip_retryperiod
           value: "1"
-        - name: address
-          value: $VIRTUAL_IP
         - name: prometheus_server
           value: ":2112"
         image: ghcr.io/kube-vip/kube-vip:v0.8.3
