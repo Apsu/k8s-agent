@@ -79,7 +79,7 @@ if [[ $RKE2_TYPE == "server" ]]; then
     # export TLS_KEY=$(base64 -w0 tls.key)
     # export TLS_CERT=$(base64 -w0 tls.crt)
 
-    if ! grep -q $API_IP/$API_CIDR -o address show dev $INTERFACE; then
+    if ! ip -o address show dev $INTERFACE | grep -q $API_IP/$API_CIDR; then
       ip address add $API_IP/$API_CIDR dev $INTERFACE
     fi
 
