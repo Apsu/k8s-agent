@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os/exec"
+	"slices"
 
 	"github.com/apsu/k8s-agent/internal/status"
 	"github.com/labstack/echo/v4"
@@ -14,8 +15,12 @@ func Log(c echo.Context) error {
 	// Use the request context to detect when the client disconnects
 	ctx := c.Request().Context()
 
-	// Run journalctl command with the request context
-	cmd := exec.CommandContext(ctx, "journalctl", "-u", "rke2-"+status.GetStatus().Type, "-f")
+	// Map node role to systemd unit
+	unit := "rke2-agent"
+	if slices.Contains([]string{"bootstrap", "controller"}, status.GetStatus().Role) {
+		unit = "rke2-server"
+	}
+	cmd := exec.CommandContext(ctx, "journalctl", "-u", unit, "-f")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("LOG: Failed to get stdout: %v", err))
