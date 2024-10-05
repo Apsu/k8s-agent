@@ -11,7 +11,7 @@ import (
 
 func Teardown(c echo.Context) error {
 	curStatus := status.GetStatus()
-	if curStatus.State != status.Ready {
+	if curStatus.State != status.Running {
 		return c.String(http.StatusConflict, "Agent not ready")
 	}
 	curStatus.State = status.Terminating
@@ -33,7 +33,7 @@ func Teardown(c echo.Context) error {
 			return
 		}
 
-		curStatus.State = status.Ready
+		curStatus.State = status.Running
 		status.UpdateStatus(curStatus)
 		fmt.Println("TEARDOWN: Completed successfully")
 	}()

@@ -11,7 +11,7 @@ import (
 
 func Deploy(c echo.Context) error {
 	curStatus := status.GetStatus()
-	if curStatus.State != status.Ready {
+	if curStatus.State != status.Running {
 		return c.String(http.StatusConflict, "Agent not ready")
 	}
 	curStatus.State = status.Deploying
