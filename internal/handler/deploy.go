@@ -10,12 +10,15 @@ import (
 )
 
 func Deploy(c echo.Context) error {
+	curStatus := status.GetStatus()
+	if curStatus.State != status.Ready {
+		return c.String(http.StatusConflict, "Agent not ready")
+	}
+	curStatus.State = status.Deploying
+	status.UpdateStatus(curStatus)
+
 	// Start deployment in a background goroutine
 	go func() {
-		curStatus := status.GetStatus()
-		curStatus.State = status.Deploying
-		status.UpdateStatus(curStatus)
-
 		fmt.Println("DEPLOY: Starting deployment")
 
 		cmd := exec.Command("/opt/k8s-agent/scripts/deploy.sh")
@@ -30,6 +33,8 @@ func Deploy(c echo.Context) error {
 			return
 		}
 
+		curStatus.State = status.Ready
+		status.UpdateStatus(curStatus)
 		fmt.Println("DEPLOY: Deployment completed successfully")
 	}()
 

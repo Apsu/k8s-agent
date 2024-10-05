@@ -10,11 +10,15 @@ import (
 )
 
 func Prepare(c echo.Context) error {
-	// Start deployment in a background goroutine
+	curStatus := status.GetStatus()
+	if curStatus.State != status.Ready {
+		return c.String(http.StatusConflict, "Agent not ready")
+	}
+	curStatus.State = status.Preparing
+	status.UpdateStatus(curStatus)
+
+	// Start prepare in the background
 	go func() {
-		curStatus := status.GetStatus()
-		curStatus.State = status.Preparing
-		status.UpdateStatus(curStatus)
 
 		fmt.Println("PREPARE: Starting prepare node")
 
@@ -30,6 +34,8 @@ func Prepare(c echo.Context) error {
 			return
 		}
 
+		curStatus.State = status.Ready
+		status.UpdateStatus(curStatus)
 		fmt.Println("PREPARE: Prepare completed successfully")
 	}()
 

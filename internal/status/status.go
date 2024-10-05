@@ -19,11 +19,12 @@ var mu sync.RWMutex
 
 // List of states
 const (
-	Initialized = "Initialized"
+	Ready       = "Ready"
 	Preparing   = "Preparing"
 	Deploying   = "Deploying"
+	Terminating = "Terminating"
 	Restarting  = "Restarting"
-	Ready       = "Ready"
+	Running     = "Running"
 	Error       = "Error"
 )
 
