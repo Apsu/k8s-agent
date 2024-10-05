@@ -4,6 +4,7 @@ import (
 	// "encoding/json"
 	// "log"
 	"fmt"
+	"os"
 	// "os"
 	"sync"
 
@@ -89,7 +90,13 @@ func init() {
 	mu.Lock()
 	defer mu.Unlock()
 
+	// envFile, err := os.Open(agentEnvPath)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer file.Close()
+
 	// Load env
-	env.Parse(agentStatus)
+	env.Parse(&agentStatus)
 	fmt.Print(agentStatus)
 }
