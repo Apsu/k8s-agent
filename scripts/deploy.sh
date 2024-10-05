@@ -85,7 +85,7 @@ if [[ $RKE2_TYPE == "server" ]]; then
   fi
 
   # Render server config
-  envsubst < configs/server-config.yaml > $RKE2_CONF_DIR/config.yaml
+  envsubst < $AGENT_DIR/configs/server-config.yaml > $RKE2_CONF_DIR/config.yaml
 
   # Render manifests
   envsubst < $AGENT_DIR/manifests/kube-vip.yaml > $RKE_MANIFEST_DIR/kube-vip.yaml
